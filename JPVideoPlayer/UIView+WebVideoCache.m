@@ -188,6 +188,23 @@
                 configuration:configuration];
 }
 
+- (void)jp_playVideoMuteWithURL:(NSURL *)url
+             bufferingIndicator:(UIView <JPVideoPlayerBufferingProtocol> *_Nullable)bufferingIndicator
+                    controlView:(UIView <JPVideoPlayerProtocol> *_Nullable)controlView
+                   progressView:(UIView <JPVideoPlayerProtocol> *_Nullable)progressView
+                  configuration:(JPPlayVideoConfiguration _Nullable)configuration {
+    [self setBufferingIndicator:bufferingIndicator
+                    controlView:controlView
+                   progressView:progressView
+             needSetControlView:YES];
+    [self jp_stopPlay];
+    [self jp_playVideoWithURL:url
+                      options:JPVideoPlayerContinueInBackground |
+                              JPVideoPlayerLayerVideoGravityResizeAspect |
+                              JPVideoPlayerMutedPlay
+                configuration:configuration];
+}
+
 - (void)jp_resumePlayWithURL:(NSURL *)url
           bufferingIndicator:(UIView <JPVideoPlayerBufferingProtocol> *_Nullable)bufferingIndicator
                  controlView:(UIView <JPVideoPlayerProtocol> *_Nullable)controlView

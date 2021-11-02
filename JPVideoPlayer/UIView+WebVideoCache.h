@@ -200,6 +200,15 @@ NS_ASSUME_NONNULL_BEGIN
                   configuration:(JPPlayVideoConfiguration _Nullable)configuration;
 
 /**
+ 带controlView的静音播放方法
+ */
+- (void)jp_playVideoMuteWithURL:(NSURL *)url
+             bufferingIndicator:(UIView <JPVideoPlayerBufferingProtocol> *_Nullable)bufferingIndicator
+                    controlView:(UIView <JPVideoPlayerProtocol> *_Nullable)controlView
+                   progressView:(UIView <JPVideoPlayerProtocol> *_Nullable)progressView
+                  configuration:(JPPlayVideoConfiguration _Nullable)configuration;
+
+/**
  * Resume play for given url with bufferingIndicator and progressView, and the player is muted.
  * `Resume` mean that user is playing video in tableView, when user tap the cell of playing video,
  * user open a detail video viewController that play the same video, but we do not wanna user play the same video from the beginning,
