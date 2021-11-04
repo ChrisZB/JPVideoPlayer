@@ -64,6 +64,7 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
     if (@available(iOS 15.0, *)) {
         constrainedRect.origin.x -= 1;
         constrainedRect.origin.y += 1;
+        constrainedRect.size.width += 2.5;
     }
     self.dragSlider.frame = constrainedRect;
     [self updateCacheProgressViewIfNeed];
