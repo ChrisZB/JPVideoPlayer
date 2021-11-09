@@ -35,6 +35,8 @@
 
 @property(nonatomic, copy) NSURL *videoURL;
 
+@property(nonatomic, assign) CGSize videoSize;
+
 @end
 
 @implementation JPVideoPlayerHelper
@@ -295,6 +297,41 @@
     JPMainThreadAssert;
     self.jp_videoURL = url;
     if (url) {
+        //获取视频尺寸
+        AVURLAsset *asset = [AVURLAsset assetWithURL:url];
+        self.helper.videoSize = CGSizeZero;
+        if (@available(iOS 15.0, *)) {
+            [asset loadTracksWithMediaType:AVMediaTypeVideo completionHandler:^(NSArray<AVAssetTrack *> * _Nullable array, NSError * _Nullable error) {
+                if (!error) {
+                    for (AVAssetTrack *track in array) {
+                        self.helper.videoSize = track.naturalSize;
+                    }
+                }
+            }];
+        } else {
+            __weak typeof(self) weakSelf = self;
+            __weak typeof(asset) weakAsset = asset;
+            [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"]
+                                 completionHandler:^{
+                NSError *error;
+                AVKeyValueStatus status = [weakAsset statusOfValueForKey:@"tracks" error:&error];
+                if (status != AVKeyValueStatusLoaded) {
+                    NSLog(@"error %@",error);
+                    return;
+                }
+                
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                
+                NSArray *array = asset.tracks;
+                
+                for (AVAssetTrack *track in array) {
+                    if ([track.mediaType isEqualToString:AVMediaTypeVideo]) {
+                        strongSelf.helper.videoSize = track.naturalSize;
+                    }
+                }
+            }];
+        }
+        
         [JPVideoPlayerManager sharedManager].delegate = self;
         self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationPortrait;
 
@@ -588,10 +625,18 @@
     CGRect screenBounds = [[UIScreen mainScreen] bounds];
     CGRect bounds = CGRectMake(0, 0, CGRectGetHeight(screenBounds), CGRectGetWidth(screenBounds));
     CGPoint center = CGPointMake(CGRectGetMidX(screenBounds), CGRectGetMidY(screenBounds));
-    videoPlayerView.bounds = bounds;
-    videoPlayerView.center = center;
-    videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
-    [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = bounds;
+
+    CGSize videoSize = self.helper.videoSize;
+    if (!CGSizeEqualToSize(videoSize, CGSizeZero) && videoSize.height < videoSize.width) {
+        videoPlayerView.bounds = bounds;
+        videoPlayerView.center = center;
+        videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
+        [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = bounds;
+    } else {
+        videoPlayerView.frame = screenBounds;
+        videoPlayerView.transform = CGAffineTransformIdentity;
+        [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = screenBounds;
+    }
 }
 
 - (void)refreshStatusBarOrientation:(UIInterfaceOrientation)interfaceOrientation {
