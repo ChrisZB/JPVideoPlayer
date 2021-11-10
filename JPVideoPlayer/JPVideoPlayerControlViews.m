@@ -60,12 +60,11 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
     self.trackProgressView.frame = CGRectMake(kJPVideoPlayerDragSliderLeftEdge,
             (referenceSize.height - kJPVideoPlayerCachedProgressViewHeight) * 0.5,
             referenceSize.width - 2 * kJPVideoPlayerDragSliderLeftEdge, kJPVideoPlayerCachedProgressViewHeight);
-    //iOS15适配
-    if (@available(iOS 15.0, *)) {
-        constrainedRect.origin.x -= 1;
-        constrainedRect.origin.y += 1;
-        constrainedRect.size.width += 2.5;
-    }
+    //slider和cacheProgress样式问题
+    constrainedRect.origin.x -= 1;
+    constrainedRect.origin.y += 1;
+    constrainedRect.size.width += 2.5;
+    
     self.dragSlider.frame = constrainedRect;
     [self updateCacheProgressViewIfNeed];
     [self playProgressDidChangeElapsedSeconds:self.elapsedSeconds
@@ -676,6 +675,8 @@ const CGFloat JPVideoPlayerProgressViewElementHeight = 2;
     self.cachedProgressView = ({
         UIView *view = [UIView new];
         view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
+        view.clipsToBounds = YES;
+        view.layer.cornerRadius = 1;
         [self.trackProgressView addSubview:view];
 
         view;
