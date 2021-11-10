@@ -60,7 +60,7 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
     self.trackProgressView.frame = CGRectMake(kJPVideoPlayerDragSliderLeftEdge,
             (referenceSize.height - kJPVideoPlayerCachedProgressViewHeight) * 0.5,
             referenceSize.width - 2 * kJPVideoPlayerDragSliderLeftEdge, kJPVideoPlayerCachedProgressViewHeight);
-    //slider和cacheProgress样式问题
+    //slider和cacheProgress样式调整
     constrainedRect.origin.x -= 1;
     constrainedRect.origin.y += 1;
     constrainedRect.size.width += 2.5;
