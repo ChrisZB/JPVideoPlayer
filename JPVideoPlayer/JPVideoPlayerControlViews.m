@@ -61,9 +61,11 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
             (referenceSize.height - kJPVideoPlayerCachedProgressViewHeight) * 0.5,
             referenceSize.width - 2 * kJPVideoPlayerDragSliderLeftEdge, kJPVideoPlayerCachedProgressViewHeight);
     //slider和cacheProgress样式调整
-    constrainedRect.origin.x -= 1;
-    constrainedRect.origin.y += 1;
-    constrainedRect.size.width += 2.5;
+    if (@available(iOS 15.0, *)) {
+        constrainedRect.origin.x -= 1;
+        constrainedRect.origin.y += 1;
+        constrainedRect.size.width += 2.5;
+    }
     
     self.dragSlider.frame = constrainedRect;
     [self updateCacheProgressViewIfNeed];
