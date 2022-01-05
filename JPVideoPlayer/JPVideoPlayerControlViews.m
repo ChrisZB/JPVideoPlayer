@@ -60,12 +60,13 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
     self.trackProgressView.frame = CGRectMake(kJPVideoPlayerDragSliderLeftEdge,
             (referenceSize.height - kJPVideoPlayerCachedProgressViewHeight) * 0.5,
             referenceSize.width - 2 * kJPVideoPlayerDragSliderLeftEdge, kJPVideoPlayerCachedProgressViewHeight);
-    //iOS15适配
+    //slider和cacheProgress样式调整
     if (@available(iOS 15.0, *)) {
         constrainedRect.origin.x -= 1;
         constrainedRect.origin.y += 1;
         constrainedRect.size.width += 2.5;
     }
+    
     self.dragSlider.frame = constrainedRect;
     [self updateCacheProgressViewIfNeed];
     [self playProgressDidChangeElapsedSeconds:self.elapsedSeconds
@@ -397,7 +398,8 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
 
 - (void)videoPlayerInterfaceOrientationDidChange:(JPVideoPlayViewInterfaceOrientation)interfaceOrientation
                                         videoURL:(NSURL *)videoURL {
-    self.landscapeButton.selected = interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscape;
+    self.landscapeButton.selected = (interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft
+                                     || interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight);
 }
 
 
@@ -539,7 +541,8 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
             constrainedRect.size.height - kJPVideoPlayerControlBarHeight,
             constrainedRect.size.width,
             kJPVideoPlayerControlBarHeight);
-    if(interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscape){ // landscape.
+    if(interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft
+       || interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight){ // landscape.
         CGFloat controlBarOriginX = 0;
         if (@available(iOS 11.0, *)) {
             UIEdgeInsets insets = self.window.safeAreaInsets;
@@ -676,6 +679,8 @@ const CGFloat JPVideoPlayerProgressViewElementHeight = 2;
     self.cachedProgressView = ({
         UIView *view = [UIView new];
         view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
+        view.clipsToBounds = YES;
+        view.layer.cornerRadius = 1;
         [self.trackProgressView addSubview:view];
 
         view;
