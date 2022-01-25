@@ -877,10 +877,10 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
 
 - (void)_setup{
     self.backgroundColor = [UIColor clearColor];
-
+    
     self.blurBackgroundView = ({
         UIView *view = [UIView new];
-        view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.6];
+        view.backgroundColor = [UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:0.3];
         view.layer.cornerRadius = 10;
         view.clipsToBounds = YES;
         [self addSubview:view];
@@ -889,7 +889,7 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
     });
 
     self.blurView = ({
-        UIVisualEffectView *blurView = [[UIVisualEffectView alloc]initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+        UIVisualEffectView *blurView = [[UIVisualEffectView alloc]initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
         [self.blurBackgroundView addSubview:blurView];
 
         blurView;
@@ -898,12 +898,12 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
     self.activityIndicator = ({
         UIActivityIndicatorView *indicator = [UIActivityIndicatorView new];
         indicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-        indicator.color = [UIColor colorWithRed:35.0/255 green:35.0/255 blue:35.0/255 alpha:1];
+        indicator.color = [UIColor whiteColor];
         [self.blurBackgroundView addSubview:indicator];
 
         indicator;
     });
-
+    
     self.animating = NO;
 }
 
