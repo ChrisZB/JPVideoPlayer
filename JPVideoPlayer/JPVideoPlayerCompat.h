@@ -25,7 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, JPVideoPlayViewInterfaceOrientation) {
     JPVideoPlayViewInterfaceOrientationUnknown = 0,
     JPVideoPlayViewInterfaceOrientationPortrait,
-    JPVideoPlayViewInterfaceOrientationLandscape,
+    JPVideoPlayViewInterfaceOrientationLandscapeLeft,
+    JPVideoPlayViewInterfaceOrientationLandscapeRight,
 };
 
 typedef NS_ENUM(NSUInteger, JPVideoPlayerStatus)  {

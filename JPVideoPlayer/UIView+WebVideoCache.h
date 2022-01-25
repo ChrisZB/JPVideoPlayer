@@ -393,6 +393,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)jp_gotoPortraitAnimated:(BOOL)flag
                      completion:(dispatch_block_t _Nullable)completion;
 
+#pragma mark - 定义参数
+
+/** 播放是否在激活状态 */
+@property (nonatomic, assign) BOOL jp_isActivty;
+
 @end
 
 NS_ASSUME_NONNULL_END

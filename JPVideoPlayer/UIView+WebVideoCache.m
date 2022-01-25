@@ -53,7 +53,7 @@
     if(_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationUnknown){
        CGSize referenceSize = self.playVideoView.window.bounds.size;
        _viewInterfaceOrientation = referenceSize.width < referenceSize.height ? JPVideoPlayViewInterfaceOrientationPortrait :
-               JPVideoPlayViewInterfaceOrientationLandscape;
+               JPVideoPlayViewInterfaceOrientationLandscapeLeft;
     }
     return _viewInterfaceOrientation;
 }
@@ -296,15 +296,18 @@
                 isResume:(BOOL)isResume {
     JPMainThreadAssert;
     self.jp_videoURL = url;
+    self.helper.videoSize = CGSizeZero;
+    self.jp_isActivty = YES;
     if (url) {
         //获取视频尺寸
         AVURLAsset *asset = [AVURLAsset assetWithURL:url];
-        self.helper.videoSize = CGSizeZero;
         if (@available(iOS 15.0, *)) {
+            __weak typeof(self) weakSelf = self;
             [asset loadTracksWithMediaType:AVMediaTypeVideo completionHandler:^(NSArray<AVAssetTrack *> * _Nullable array, NSError * _Nullable error) {
+                __strong typeof(weakSelf) strongSelf = weakSelf;
                 if (!error) {
                     for (AVAssetTrack *track in array) {
-                        self.helper.videoSize = track.naturalSize;
+                        strongSelf.helper.videoSize = track.naturalSize;
                     }
                 }
             }];
@@ -440,6 +443,7 @@
 }
 
 - (void)jp_seekToTime:(CMTime)time {
+    self.jp_isActivty = YES;
     [[JPVideoPlayerManager sharedManager] seekToTime:time];
 }
 
@@ -452,10 +456,12 @@
 }
 
 - (void)jp_pause {
+    self.jp_isActivty = NO;
     [[JPVideoPlayerManager sharedManager] pause];
 }
 
 - (void)jp_resume {
+    self.jp_isActivty = YES;
     [[JPVideoPlayerManager sharedManager] resume];
 }
 
@@ -480,11 +486,25 @@
 
 - (void)jp_gotoLandscapeAnimated:(BOOL)flag
                       completion:(dispatch_block_t)completion {
-    if (self.jp_viewInterfaceOrientation != JPVideoPlayViewInterfaceOrientationPortrait) {
+    if (self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationUnknown) {
         return;
     }
+    
+    UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
 
-    self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationLandscape;
+    if (deviceOrientation == UIDeviceOrientationLandscapeLeft) {
+        if (self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft) {
+            return;
+        }
+        self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationLandscapeLeft;
+    }
+    else {
+        if (self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight) {
+            return;
+        }
+        self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationLandscapeRight;
+    }
+
     JPVideoPlayerView *videoPlayerView = self.helper.videoPlayerView;
     videoPlayerView.backgroundColor = [UIColor blackColor];
 
@@ -499,7 +519,7 @@
                               delay:0
                             options:UIViewAnimationOptionCurveEaseOut
                          animations:^{
-                             [self executeLandscape];
+                            [self executeLandscape];
                          }
                          completion:^(BOOL finished) {
                              if (completion) {
@@ -525,7 +545,7 @@
         }];
     }
     [self refreshStatusBarOrientation:UIInterfaceOrientationLandscapeRight];
-    [self callOrientationDelegateWithInterfaceOrientation:JPVideoPlayViewInterfaceOrientationLandscape];
+    [self callOrientationDelegateWithInterfaceOrientation:self.helper.viewInterfaceOrientation];
 }
 
 - (void)jp_gotoPortrait {
@@ -535,7 +555,8 @@
 
 - (void)jp_gotoPortraitAnimated:(BOOL)flag
                      completion:(dispatch_block_t)completion{
-    if (self.jp_viewInterfaceOrientation != JPVideoPlayViewInterfaceOrientationLandscape) {
+    if (!(self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft
+          || self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight)) {
         return;
     }
 
@@ -627,14 +648,32 @@
     CGPoint center = CGPointMake(CGRectGetMidX(screenBounds), CGRectGetMidY(screenBounds));
 
     CGSize videoSize = self.helper.videoSize;
-    if (!CGSizeEqualToSize(videoSize, CGSizeZero) && videoSize.height < videoSize.width) {
+    if (!CGSizeEqualToSize(videoSize, CGSizeZero)) {
+        
+        if (videoSize.height < videoSize.width) {
+            UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+
+            videoPlayerView.bounds = bounds;
+            videoPlayerView.center = center;
+            
+            if (orientation == UIDeviceOrientationLandscapeRight) {
+                videoPlayerView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+            }
+            else {
+                videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
+            }
+            [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = bounds;
+        }
+        else {
+            videoPlayerView.frame = screenBounds;
+            videoPlayerView.transform = CGAffineTransformIdentity;
+            [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = screenBounds;
+        }
+    }
+    else {
         videoPlayerView.bounds = bounds;
         videoPlayerView.center = center;
         videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
-        [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = bounds;
-    } else {
-        videoPlayerView.frame = screenBounds;
-        videoPlayerView.transform = CGAffineTransformIdentity;
         [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = screenBounds;
     }
 }
@@ -828,6 +867,18 @@ shouldResumePlaybackFromPlaybackRecordForURL:(NSURL *)videoURL
                                                                    elapsedSeconds:elapsedSeconds];
     }
     return shouldResume;
+}
+
+#pragma mark - 定义参数
+
+- (BOOL)jp_isActivty
+{
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
+
+- (void)setJp_isActivty:(BOOL)jp_isActivty
+{
+    objc_setAssociatedObject(self, @selector(jp_isActivty), @(jp_isActivty), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

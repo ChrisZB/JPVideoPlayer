@@ -398,7 +398,8 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
 
 - (void)videoPlayerInterfaceOrientationDidChange:(JPVideoPlayViewInterfaceOrientation)interfaceOrientation
                                         videoURL:(NSURL *)videoURL {
-    self.landscapeButton.selected = interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscape;
+    self.landscapeButton.selected = (interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft
+                                     || interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight);
 }
 
 
@@ -540,7 +541,8 @@ nearestViewControllerInViewTree:(UIViewController *_Nullable)nearestViewControll
             constrainedRect.size.height - kJPVideoPlayerControlBarHeight,
             constrainedRect.size.width,
             kJPVideoPlayerControlBarHeight);
-    if(interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscape){ // landscape.
+    if(interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft
+       || interfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight){ // landscape.
         CGFloat controlBarOriginX = 0;
         if (@available(iOS 11.0, *)) {
             UIEdgeInsets insets = self.window.safeAreaInsets;
