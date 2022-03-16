@@ -648,32 +648,29 @@
     CGPoint center = CGPointMake(CGRectGetMidX(screenBounds), CGRectGetMidY(screenBounds));
 
     CGSize videoSize = self.helper.videoSize;
-    if (!CGSizeEqualToSize(videoSize, CGSizeZero)) {
-        
-        if (videoSize.height < videoSize.width) {
-            UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
-
-            videoPlayerView.bounds = bounds;
-            videoPlayerView.center = center;
-            
-            if (orientation == UIDeviceOrientationLandscapeRight) {
-                videoPlayerView.transform = CGAffineTransformMakeRotation(-M_PI_2);
-            }
-            else {
-                videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
-            }
-            [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = bounds;
-        }
-        else {
-            videoPlayerView.frame = screenBounds;
-            videoPlayerView.transform = CGAffineTransformIdentity;
-            [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = screenBounds;
-        }
+    
+    //如果取不到视频的宽高，是view的大小
+    if (videoSize.width == 0 && videoSize.height == 0) {
+        videoSize = [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame.size;
     }
-    else {
+    
+    if (videoSize.height < videoSize.width) {
+        UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+        
         videoPlayerView.bounds = bounds;
         videoPlayerView.center = center;
-        videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
+        
+        if (orientation == UIDeviceOrientationLandscapeRight) {
+            videoPlayerView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+        }
+        else {
+            videoPlayerView.transform = CGAffineTransformMakeRotation(M_PI_2);
+        }
+        [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = bounds;
+    }
+    else {
+        videoPlayerView.frame = screenBounds;
+        videoPlayerView.transform = CGAffineTransformIdentity;
         [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame = screenBounds;
     }
 }
