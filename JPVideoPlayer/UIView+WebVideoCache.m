@@ -498,11 +498,17 @@
         }
         self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationLandscapeLeft;
     }
-    else {
+    else if (deviceOrientation == UIDeviceOrientationLandscapeRight) {
         if (self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeRight) {
             return;
         }
         self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationLandscapeRight;
+    }
+    else {
+        if (self.jp_viewInterfaceOrientation == JPVideoPlayViewInterfaceOrientationLandscapeLeft) {
+            return;
+        }
+        self.helper.viewInterfaceOrientation = JPVideoPlayViewInterfaceOrientationLandscapeLeft;
     }
 
     JPVideoPlayerView *videoPlayerView = self.helper.videoPlayerView;
@@ -648,12 +654,12 @@
     CGPoint center = CGPointMake(CGRectGetMidX(screenBounds), CGRectGetMidY(screenBounds));
 
     CGSize videoSize = self.helper.videoSize;
-    
+
     //如果取不到视频的宽高，是view的大小
     if (videoSize.width == 0 && videoSize.height == 0) {
-        videoSize = [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.frame.size;
+        videoSize = [[JPVideoPlayerManager sharedManager] videoPlayer].playerModel.playerLayer.videoRect.size;
     }
-    
+
     if (videoSize.height < videoSize.width) {
         UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
         
